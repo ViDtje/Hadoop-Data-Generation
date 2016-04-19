@@ -1,19 +1,33 @@
 
 
 import java.io.IOException;
-import org.apache.hadoop.io.IntWritable;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class GenerationMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
+	private int nrOfRecords;
+	private int nrOfMappers;
 	
 	@Override
-	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-//		context.getConfiguration().get()
-		
+	protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        nrOfRecords = Integer.parseInt(conf.get("DataGen.nrOfRecords"));
+        nrOfMappers = Integer.parseInt(conf.get("DataGen.nrOfMappers"));
+	}
+	
+	@Override
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {		
 		String line = value.toString();
-//		System.out.println(line);
-		context.write(new Text(line), new IntWritable((int) (Math.random() * 100))); // Indien we enkel mapper gebruiken
+		
+		int nrOfRecordsForThisMapper = nrOfRecords/nrOfMappers;
+		
+		UserGenerator gen = new UserGenerator();
+		
+		for (int i = 0; i < nrOfRecordsForThisMapper; i++) {
+			context.write(new Text("Mapper ID: " + line), new Text(gen.generate()));
+		}
 	}
 }
