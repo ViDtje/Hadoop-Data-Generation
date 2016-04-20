@@ -1,6 +1,10 @@
 
 public class UserGenerator {
-	public String generate() {
-		return "" + ((Math.random() * 100));
+	int mapperId;
+	
+	public UserGenerator(int mapperId) { this.mapperId = mapperId; } 
+	
+	public String generate(int recordNr) {
+		return "" + (recordNr * recordNr); 
 	}
 }

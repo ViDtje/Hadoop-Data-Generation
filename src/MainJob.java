@@ -18,8 +18,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class MainJob {
-	private static int nrOfMappers = 10;
-	private static int nrOfRecords = 1000;
+	private static int nrOfMappers = 4;
+	private static int nrOfRecords = 100;
 	private static String inputPath = "input/";
 	private static String outputPath = "output"; // timestamp gets added in the last folder
 	private static String mapperPath = "mappers/";

@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 	private int nrOfRecords;
 	private int nrOfMappers;
+	private int mapId;
 	
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
@@ -20,14 +21,14 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 	
 	@Override
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {		
-		String line = value.toString();
+		mapId = Integer.parseInt(value.toString());
 		
 		int nrOfRecordsForThisMapper = nrOfRecords/nrOfMappers;
+		int firstLineNr = mapId * nrOfRecordsForThisMapper;		
 		
-		UserGenerator gen = new UserGenerator();
-		
+		UserGenerator gen = new UserGenerator(mapId);
 		for (int i = 0; i < nrOfRecordsForThisMapper; i++) {
-			context.write(new Text("Mapper ID: " + line), new Text(gen.generate()));
+			context.write(new Text("Mapper ID: " + mapId), new Text(gen.generate(firstLineNr + i)));
 		}
 	}
 }
