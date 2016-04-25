@@ -8,27 +8,27 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
-	private int nrOfRecords;
-	private int nrOfMappers;
-	private int mapId;
+	private MapperContext mapperContext;
 	
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        nrOfRecords = Integer.parseInt(conf.get("DataGen.nrOfRecords"));
-        nrOfMappers = Integer.parseInt(conf.get("DataGen.nrOfMappers"));
+        Configuration conf = context.getConfiguration();        
+        mapperContext = new MapperContext();
+        mapperContext.setNrOfRecords(Integer.parseInt(conf.get("DataGen.nrOfRecords")));
+        mapperContext.setNrOfMappers(Integer.parseInt(conf.get("DataGen.nrOfMappers")));
 	}
 	
 	@Override
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {		
-		mapId = Integer.parseInt(value.toString());
+		mapperContext.setMapperId(Integer.parseInt(value.toString()));
 		
-		int nrOfRecordsForThisMapper = nrOfRecords/nrOfMappers;
-		int firstLineNr = mapId * nrOfRecordsForThisMapper;		
+		mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
+		mapperContext.setFirstLineNumber(mapperContext.getMapperId() * mapperContext.getNrOfRecords());		
 		
-		UserGenerator gen = new UserGenerator(mapId);
-		for (int i = 0; i < nrOfRecordsForThisMapper; i++) {
-			context.write(new Text("Mapper ID: " + mapId), new Text(gen.generate(firstLineNr + i)));
+		UserGenerator gen = new UserGenerator(mapperContext);
+		for (int i = 0; i < mapperContext.getNrOfRecordsForThisMapper(); i++) {
+			mapperContext.setRecordNr(mapperContext.getFirstLineNumber() + i);
+			context.write(new Text("Mapper ID: " + mapperContext.getMapperId()), new Text(gen.generate()));
 		}
 	}
 }
