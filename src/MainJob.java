@@ -44,6 +44,7 @@ public class MainJob {
 		if (args.length >= 2) {
 			nrOfMappers = Integer.parseInt(args[0]);
 			nrOfRecords = Integer.parseInt(args[1]);
+			
 		}
 			
 		System.out.println("nrOfMappers: " + nrOfMappers);
@@ -57,7 +58,11 @@ public class MainJob {
 	    
 	    System.out.println("map spill buffer: "+ conf.get("mapreduce.task.io.sort.mb"));
 	    System.out.println("map spill percent: " + conf.get("mapreduce.map.sort.spill.percent"));
-	   		
+	   	
+	    // get special parameters, e.g. -Dtest 
+	    // (put these first in arg list!)
+	    System.out.println("test parameter: " + conf.get("test"));
+	    
 		Job job = new Job(conf);
 		job.setJarByClass(MainJob.class);
 		job.setJobName("Generate Data");
@@ -73,6 +78,8 @@ public class MainJob {
 		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
+		
+		System.out.println("map spill buffer: " + job.getConfiguration().get("mapreduce.task.io.sort.mb"));
 				
 		if (!job.waitForCompletion(true))
 			System.exit(0);
