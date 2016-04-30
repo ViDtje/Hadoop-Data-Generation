@@ -3,13 +3,13 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class SystemX extends Configured implements Tool {
-
-	
 	
 	@Override
 	public int run(String[] arg0) throws Exception {
 		MainJob job = new MainJob();
-		job.createJob(arg0);
+		System.out.println("mapreduce spill size: " + getConf().get("mapreduce.task.io.sort.mb"));
+		System.out.println("mapreduce spill percent: " + getConf().get("mapreduce.map.sort.spill.percent"));
+		job.createJob(arg0, getConf());
 		return 0;
 	}
 	
@@ -18,3 +18,4 @@ public class SystemX extends Configured implements Tool {
 		System.exit(res);
 	}
 }
+ 

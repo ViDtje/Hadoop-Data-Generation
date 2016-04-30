@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 	private MapperContext mapperContext;
+	private String generateFunction;
 	
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
@@ -25,7 +26,24 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 		mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
 		mapperContext.setFirstLineNumber(mapperContext.getMapperId() * mapperContext.getNrOfRecords());		
 		
-		UserGenerator gen = new UserGenerator(mapperContext);
+//		UserGenerator gen = new UserGenerator(mapperContext);
+		Class c = null;
+		try {
+			c = Class.forName("MyUserGenerator");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Object obj = null;
+		try {
+			obj = c.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		UserGenerator gen = (UserGenerator) obj;
+		gen.setMapperContext(mapperContext);
+		
 		for (int i = 0; i < mapperContext.getNrOfRecordsForThisMapper(); i++) {
 			mapperContext.setRecordNr(mapperContext.getFirstLineNumber() + i);
 			context.write(new Text("Mapper ID: " + mapperContext.getMapperId()), new Text(gen.generate()));

@@ -6,7 +6,14 @@ public class MapperContext {
 	private int firstLineNumber;
 	private int recordNr;
 	private int nrOfRecordsForThisMapper;
+	private int nrOfAttributes;
 	
+	public int getNrOfAttributes() {
+		return nrOfAttributes;
+	}
+	public void setNrOfAttributes(int nrOfAttributes) {
+		this.nrOfAttributes = nrOfAttributes;
+	}
 	public int getRecordNr() {
 		return recordNr;
 	}

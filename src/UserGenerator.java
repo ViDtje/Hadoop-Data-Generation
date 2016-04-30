@@ -1,10 +1,18 @@
 
-public class UserGenerator {
-	private MapperContext mapperContext;
+public abstract class UserGenerator {
+	protected MapperContext mapperContext;
+	
+	public UserGenerator() {}
 	
 	public UserGenerator(MapperContext mapperContext) { this.mapperContext = mapperContext; } 
-	
-	public String generate() {
-		return "" + mapperContext.getRecordNr() * mapperContext.getRecordNr(); 
+		
+	public MapperContext getMapperContext() {
+		return mapperContext;
 	}
+
+	public void setMapperContext(MapperContext mapperContext) {
+		this.mapperContext = mapperContext;
+	}
+
+	public abstract String generate();
 }
