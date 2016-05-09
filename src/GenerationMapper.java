@@ -14,9 +14,8 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();        
-        mapperContext = new MapperContext();
-        mapperContext.setNrOfRecords(Integer.parseInt(conf.get("DataGen.nrOfRecords")));
-        mapperContext.setNrOfMappers(Integer.parseInt(conf.get("DataGen.nrOfMappers")));
+        mapperContext = MapperContext.deserializeContext(conf.get("Datagen.context"));
+        System.out.println("MapperContext: " + mapperContext);
 	}
 	
 	@Override
@@ -26,10 +25,29 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 		mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
 		mapperContext.setFirstLineNumber(mapperContext.getMapperId() * mapperContext.getNrOfRecords());		
 		
-//		UserGenerator gen = new UserGenerator(mapperContext);
+		UserGenerator gen = makeGenerator();
+		gen.setMapperContext(mapperContext);
+		
+		// Generate the data with the chosen generator
+		for (int i = 0; i < mapperContext.getNrOfRecordsForThisMapper(); i++) {
+			mapperContext.setRecordNr(mapperContext.getFirstLineNumber() + i);
+			context.write(new Text("Mapper ID: " + mapperContext.getMapperId()), new Text(gen.generate()));
+		}
+	}
+	
+	private UserGenerator makeGenerator() {
+		if (mapperContext.getRecordGenerator() != null)
+			return makeRecordGenerator();
+		
+		return makeAttributeGenerator();
+	}
+
+
+
+	private UserGenerator makeRecordGenerator() {
 		Class c = null;
-		try {
-			c = Class.forName("MyUserGenerator");
+		try {	
+			c = Class.forName(mapperContext.getRecordGenerator());
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -43,10 +61,10 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 		}
 		UserGenerator gen = (UserGenerator) obj;
 		gen.setMapperContext(mapperContext);
-		
-		for (int i = 0; i < mapperContext.getNrOfRecordsForThisMapper(); i++) {
-			mapperContext.setRecordNr(mapperContext.getFirstLineNumber() + i);
-			context.write(new Text("Mapper ID: " + mapperContext.getMapperId()), new Text(gen.generate()));
-		}
+		return gen;
+	}
+	
+	private UserGenerator makeAttributeGenerator() {
+		return new AttributeGenerator();
 	}
 }

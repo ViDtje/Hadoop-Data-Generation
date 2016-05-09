@@ -1,5 +1,5 @@
 
-public class MyUserGenerator extends UserGenerator {
+public class SquareGenerator extends UserGenerator {
 
 	@Override
 	public String generate() {
