@@ -4,10 +4,11 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class GenerationMapper extends Mapper<LongWritable, Text, NullWritable, Text> {
 	private MapperContext mapperContext;
 	private String generateFunction;
 	
@@ -25,46 +26,47 @@ public class GenerationMapper extends Mapper<LongWritable, Text, Text, Text> {
 		mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
 		mapperContext.setFirstLineNumber(mapperContext.getMapperId() * mapperContext.getNrOfRecords());		
 		
-		UserGenerator gen = makeGenerator();
-		gen.setMapperContext(mapperContext);
+		UserGenerator gen = UserGenerator.makeUserGenerator(mapperContext);
 		
 		// Generate the data with the chosen generator
 		for (int i = 0; i < mapperContext.getNrOfRecordsForThisMapper(); i++) {
 			mapperContext.setRecordNr(mapperContext.getFirstLineNumber() + i);
-			context.write(new Text("Mapper ID: " + mapperContext.getMapperId()), new Text(gen.generate()));
+			// TODO key nullwritable
+			context.write(NullWritable.get(), new Text(gen.generate()));
 		}
 	}
 	
-	private UserGenerator makeGenerator() {
-		if (mapperContext.getRecordGenerator() != null)
-			return makeRecordGenerator();
-		
-		return makeAttributeGenerator();
-	}
-
-
-
-	private UserGenerator makeRecordGenerator() {
-		Class c = null;
-		try {	
-			c = Class.forName(mapperContext.getRecordGenerator());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Object obj = null;
-		try {
-			obj = c.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		UserGenerator gen = (UserGenerator) obj;
-		gen.setMapperContext(mapperContext);
-		return gen;
-	}
-	
-	private UserGenerator makeAttributeGenerator() {
-		return new AttributeGenerator();
-	}
+//	private UserGenerator makeGenerator() {
+//		if (mapperContext.getRecordGenerator() != null)
+//			return makeRecordGenerator();
+//		
+//		return makeAttributeGenerator();
+//	}
+//
+//
+//
+//	private UserGenerator makeRecordGenerator() {
+//		return UserGenerator.makeUserGenerator(mapperContext.getRecordGenerator());
+////		Class c = null;
+////		try {	
+////			c = Class.forName(mapperContext.getRecordGenerator());
+////		} catch (ClassNotFoundException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+////		Object obj = null;
+////		try {
+////			obj = c.newInstance();
+////		} catch (InstantiationException | IllegalAccessException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+////		UserGenerator gen = (UserGenerator) obj;
+////		gen.setMapperContext(mapperContext);
+////		return gen;
+//	}
+//	
+//	private UserGenerator makeAttributeGenerator() {
+//		return new AttributeGenerator();
+//	}
 }

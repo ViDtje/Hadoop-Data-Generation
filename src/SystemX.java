@@ -8,54 +8,42 @@ import org.apache.hadoop.util.ToolRunner;
 public class SystemX extends Configured implements Tool {
 	
 	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new SystemX(), args);
+		Graph g = new Graph();
+		g.test();
+		
+		int res = 0;
+//		int res = ToolRunner.run(new SystemX(), args);
 		System.exit(res);
 	}
 	
-//	@Override
-//	public int run(String[] arg0) throws Exception {
-//		JobControl jobctrl = new JobControl("DataGeneration");
-//		
-//		DataGenJob job = new DataGenJob(parseArguments(arg0));
-//		ControlledJob cJob = job.createJob();
-//		cJob.getJob().setJarByClass(getClass());
-//		jobctrl.addJob(job.createJob());
-//		
-//		// Start all jobs 
-//		Thread t = new Thread(jobctrl);
-//		t.start();
-//		
-//		// Wait until all jobs are finished
-//		while (!jobctrl.allFinished()){
-////			System.out.println("Still running...");
-//	        Thread.sleep(5000);
-//		}
-//		
-//		// Print all the stats per job
-//		for (ControlledJob obj : jobctrl.getSuccessfulJobList())  {
-//			System.out.println("JobCounters from job: " + obj.getJob().getCounters());
-//		}
-//		
-//		// Print all the stats per job
-//		for (ControlledJob obj : jobctrl.getFailedJobList())  {
-//			System.out.println("JobCounters from job: " + obj.getJob().getCounters());
-//		}
-//		
-//		// TODO cleanup all jobs
-//		job.cleanup();
-//		
-//		return 0;
-//	}
-	
 	@Override
 	public int run(String[] arg0) throws Exception {
+		JobControl jobctrl = new JobControl("DataGeneration");
 		
 		DataGenJob job = new DataGenJob(parseArguments(arg0), getConf());
-		Job cJob = job.createJob();
-		cJob.setJarByClass(SystemX.class);
+		ControlledJob cJob = job.createJob();
+		cJob.getJob().setJarByClass(getClass());
+		jobctrl.addJob(cJob);
 		
-		if (!cJob.waitForCompletion(true)) {
-			System.exit(0);
+		// Start all jobs 
+		Thread t = new Thread(jobctrl);
+		t.start();
+		
+		// Wait until all jobs are finished
+		while (!jobctrl.allFinished()){
+//			System.out.println("Still running...");
+			Thread.yield();
+	        Thread.sleep(5000);
+		}
+		
+		// Print all the stats per job
+		for (ControlledJob obj : jobctrl.getSuccessfulJobList())  {
+			System.out.println("JobCounters from job: " + obj.getJob().getCounters());
+		}
+		
+		// Print all the stats per job
+		for (ControlledJob obj : jobctrl.getFailedJobList())  {
+			System.out.println("JobCounters from job: " + obj.getJob().getCounters());
 		}
 		
 		// TODO cleanup all jobs
@@ -63,6 +51,7 @@ public class SystemX extends Configured implements Tool {
 		
 		return 0;
 	}
+
 	
 	private JobContext parseArguments(String[] args) {
 		int nrOfMappers = 1;
@@ -74,6 +63,8 @@ public class SystemX extends Configured implements Tool {
 			nrOfMappers = Integer.parseInt(args[0]);
 			nrOfRecords = Integer.parseInt(args[1]);
 		}
+		
+		
 		
 		MapperContext mapCtxt = new MapperContext();
 		mapCtxt.setNrOfRecords(nrOfRecords);

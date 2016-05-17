@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.tools.GetConf;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -45,22 +46,18 @@ public class DataGenJob {
 		this.conf = conf;
 	}
 	
-	public Job createJob() throws Exception{
+	public ControlledJob createJob() throws Exception{
 	    conf.set("Datagen.context", MapperContext.serializeContext(mapCtxt));
 	    
 		Job job = new Job(conf);
-		job.setJarByClass(getClass());
+//		job.setJarByClass(getClass());
 		job.setJobName("Generate Data " + jobCtxt.getJobNr());
 		
-		// get special parameters, e.g. -Dtest 
-	    // (put these first in arg list!)
-	    System.out.println("test parameter: " + conf.get("test"));
-		
-	    // Only works after the conf has been filled by the job
-		System.out.println("map spill buffer: "+ job.getConfiguration().get("mapreduce.task.io.sort.mb"));
-		System.out.println("map spill percent: " + job.getConfiguration().get("mapreduce.map.sort.spill.percent"));
-		
 		makeOutputPath();
+		
+//		int spillSize = Integer.parseInt(job.getConfiguration().get("mapreduce.task.io.sort.mb"));
+//		float spillPercentage = Float.parseFloat(job.getConfiguration().get("mapreduce.map.sort.spill.percent"));
+//		mapCtxt.setNrOfMappers(new MapperCalculator(spillSize, spillPercentage).CalculateMappers(mapCtxt));
 		createMapperFiles(conf);
 		
 		FileInputFormat.addInputPath(job, new Path(jobCtxt.getInputPath()));
@@ -69,15 +66,23 @@ public class DataGenJob {
 		job.setMapperClass(GenerationMapper.class);
 		job.setNumReduceTasks(0);
 		
-		job.setOutputKeyClass(Text.class);
+		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(Text.class);
+				
+		ControlledJob cJob = new ControlledJob(conf);
+		cJob.setJob(job);
 		
-		return job;
+		System.out.println("Number of mappers: " + mapCtxt.getNrOfMappers());
+		System.out.println("Number of records: " + mapCtxt.getNrOfRecords());
+		// get special parameters, e.g. -Dtest 
+	    // (put these first in arg list!)
+	    System.out.println("test parameter: " + conf.get("test"));
 		
-//		ControlledJob cJob = new ControlledJob(conf);
-//		cJob.setJob(job);
-//		
-//		return cJob;
+	    // Only works after the conf has been filled by the job
+		System.out.println("map spill buffer: "+ job.getConfiguration().get("mapreduce.task.io.sort.mb"));
+		System.out.println("map spill percent: " + job.getConfiguration().get("mapreduce.map.sort.spill.percent"));
+		
+		return cJob;
 	}
 	
 	private void makeOutputPath() {
