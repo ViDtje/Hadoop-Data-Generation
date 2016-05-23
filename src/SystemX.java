@@ -1,3 +1,4 @@
+
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.mapred.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.Job;
@@ -9,7 +10,7 @@ public class SystemX extends Configured implements Tool {
 	
 	public static void main(String[] args) throws Exception {
 		Graph g = new Graph();
-		g.test();
+		g.constraintTests();
 		
 		int res = 0;
 //		int res = ToolRunner.run(new SystemX(), args);
