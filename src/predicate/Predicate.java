@@ -1,6 +1,8 @@
 package predicate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public abstract class Predicate {
 	protected String attribute;
@@ -18,4 +20,8 @@ public abstract class Predicate {
 	}
 	public abstract boolean eval(HashMap<String, Integer> values);
 	
+	public Set<String> getAttributes(Set<String> attributes) {
+		attributes.add(attribute);
+		return attributes;
+	}
 }

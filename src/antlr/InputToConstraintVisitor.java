@@ -12,7 +12,11 @@ import predicate.valueGreaterThanAttributePredicate;
 import predicate.valueLowerThanAttributePredicate;
 
 public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predicate> {
-	public ArrayList<Constraint> constraints = new ArrayList<>();
+	private ArrayList<Constraint> constraints = new ArrayList<>();
+	
+	public  ArrayList<Constraint> getConstraints() {
+		return constraints;
+	}
 	
 	/**
 	 * Visit a parse tree produced by {@link ConstraintGrammarParser#constraint}.
@@ -66,14 +70,6 @@ public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predi
 		return p;
 	}
 	
-//	/**
-//	 * Visit a parse tree produced by {@link ConstraintGrammarParser#inequality}.
-//	 * @param ctx the parse tree
-//	 * @return the visitor result
-//	 */
-//	public Predicate visitInequality(ConstraintGrammarParser.InequalityContext ctx) {
-//		return null;
-//	}
 	
 	/**
 	 * Visit a parse tree produced by {@link ConstraintGrammarParser#valueLowerThanAttribute}.
@@ -111,5 +107,4 @@ public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predi
 		p.setValue2(Integer.parseInt(ctx.VALUE(1).getText()));
 		return p;
 	}
-	
 }

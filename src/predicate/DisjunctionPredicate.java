@@ -1,6 +1,8 @@
 package predicate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class DisjunctionPredicate extends Predicate {
 	private Predicate predicate1 = null;
@@ -30,5 +32,12 @@ public class DisjunctionPredicate extends Predicate {
 	@Override
 	public String toString() {
 		return "DisjunctionPredicate [predicate1=" + predicate1 + ", predicate2=" + predicate2 + "]";
+	}
+	
+	@Override
+	public  Set<String> getAttributes(Set<String> attributes) {
+		attributes.addAll(predicate1.getAttributes(attributes));
+		attributes.addAll(predicate2.getAttributes(attributes));
+		return attributes;
 	}
 }

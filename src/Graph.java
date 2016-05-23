@@ -22,11 +22,13 @@ import antlr.ConstraintGrammarLexer;
 import antlr.ConstraintGrammarParser;
 import antlr.ConstraintGrammarVisitor;
 import antlr.InputToConstraintVisitor;
+import predicate.Constraint;
 
 public class Graph {
-	UndirectedGraph<String, DefaultEdge> graph;
+	private UndirectedGraph<String, DefaultEdge> graph;
+	private ArrayList<Constraint> constraints;
 	
-	public void constraintTests() {
+	public void parseConstraints() {
 //		ArrayList<Constraint> constraints = makeConstraints();
 //		System.out.println(constraints);
 //		graph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
@@ -39,7 +41,7 @@ public class Graph {
 //		
 //		graphAlgorithms();
 		
-		String inputString = "| A = 0 &&0<B|=1 \n | A = 0 &&0>B|=1\n\n |A=0&&0<B<10||C=2|=2 \n\n\n |A=0||0<B<10&&C=2|=3\n";
+		String inputString = "|A1=0&&A2=0|=5 \n |A2=0&&A3=0|=5 \n |A3=0&&A4=0|=5\n";
 		
 		// create a CharStream that reads from standard input
 		ANTLRInputStream input = new ANTLRInputStream(inputString); 
@@ -60,105 +62,35 @@ public class Graph {
 		
 		InputToConstraintVisitor vis = new InputToConstraintVisitor();
 		vis.visit(tree);
-		System.out.println(vis.constraints);
+//		System.out.println(vis.getConstraints());
+		constraints = vis.getConstraints();
+		
+		makeGraph();
 	}
 	
-//	private ArrayList<Constraint> makeConstraints() {
-//		ArrayList<Constraint> constraints = new ArrayList<>();
-//		
-//		Predicate p1 = new Predicate();
-//		p1.setAttribute("A1");
-//		p1.setValue(0);
-//		Predicate p2 = new Predicate();
-//		p2.setAttribute("A2");
-//		p2.setValue(0);
-//		Constraint c = new Constraint();
-//		c.setCardinality(5);
-//		c.getPredicates().add(p1);
-//		c.getPredicates().add(p2);
-//		constraints.add(c);
-//		
-//		p1 = new Predicate();
-//		p1.setAttribute("A2");
-//		p1.setValue(0);
-//		p2 = new Predicate();
-//		p2.setAttribute("A3");
-//		p2.setValue(0);
-//		c = new Constraint();
-//		c.setCardinality(5);
-//		c.getPredicates().add(p1);
-//		c.getPredicates().add(p2);
-//		constraints.add(c);
-//		
-//		p1 = new Predicate();
-//		p1.setAttribute("A3");
-//		p1.setValue(0);
-//		p2 = new Predicate();
-//		p2.setAttribute("A4");
-//		p2.setValue(0);
-//		c = new Constraint();
-//		c.setCardinality(5);
-//		c.getPredicates().add(p1);
-//		c.getPredicates().add(p2);
-//		constraints.add(c);
-//		
-//		return constraints;
-//	}
+	public void makeGraph() {
+		graph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+		for (Constraint c : constraints) {
+			Set<String> attrs = c.getPredicate().getAttributes(new HashSet<String>());
+			
+			// Add vertices
+			for (String s : attrs) 
+				graph.addVertex(s);
+			
+			
+			// Add edges
+			for (String s1 : attrs) {
+				for (String s2 : attrs) {
+					if (!s1.equals(s2))
+						graph.addEdge(s1, s2);
+				}
+			}
+		}
+			
+		System.out.println(graph);
+	}
 	
-	public void graphAlgorithms(){
-		
-		
-		
-//		// Algorithm example
-//		// Add vertices
-//		g.addVertex("X1");
-//		g.addVertex("X2");
-//		g.addVertex("X3");
-//		g.addVertex("X4");
-//		
-//		// Add edges
-//		g.addEdge("X1", "X2");
-//		g.addEdge("X1", "X4");
-//		g.addEdge("X2", "X3");
-//		g.addEdge("X4", "X3");
-		
-//		// Wikipedia chordal graph example
-//		// Add vertices
-//		g.addVertex("X1");
-//		g.addVertex("X2");
-//		g.addVertex("X3");
-//		g.addVertex("X4");
-//		g.addVertex("X5");
-//		
-//		// Add edges
-//		g.addEdge("X1", "X2");
-//		g.addEdge("X2", "X3");
-//		g.addEdge("X3", "X4");
-//		g.addEdge("X4", "X5");
-//		g.addEdge("X5", "X1");
-		
-		// Clique tree algorithm example
-		// Add vertices
-//		graph.addVertex("X1");
-//		graph.addVertex("X2");
-//		graph.addVertex("X3");
-//		graph.addVertex("X4");
-//		graph.addVertex("X5");
-//		graph.addVertex("X6");
-//		graph.addVertex("X7");
-//		
-//		// Add edges
-//		graph.addEdge("X1", "X5");
-//		graph.addEdge("X1", "X7");
-//		graph.addEdge("X2", "X3");
-//		graph.addEdge("X2", "X6");
-//		graph.addEdge("X3", "X6");
-//		graph.addEdge("X4", "X6");
-//		graph.addEdge("X4", "X7");
-//		graph.addEdge("X5", "X6");
-//		graph.addEdge("X5", "X7");
-//		graph.addEdge("X6", "X7");
-		
+	public void graphAlgorithms(){	
 		UndirectedGraph chordalGraph = getChordalGraph(graph);
 		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = getWeightedCliqueIntersectionGraph(graph);
 		SimpleWeightedGraph cliqueTree = getMaximumWeightSpanningTree(weightedCliqueIntersectionGraph);

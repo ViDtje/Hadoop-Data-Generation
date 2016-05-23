@@ -10,7 +10,7 @@ public class SystemX extends Configured implements Tool {
 	
 	public static void main(String[] args) throws Exception {
 		Graph g = new Graph();
-		g.constraintTests();
+		g.parseConstraints();
 		
 		int res = 0;
 //		int res = ToolRunner.run(new SystemX(), args);
