@@ -17,6 +17,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
 
 import antlr.ConstraintGrammarLexer;
 import antlr.ConstraintGrammarParser;
@@ -27,22 +28,10 @@ import predicate.Constraint;
 public class Graph {
 	private UndirectedGraph<String, DefaultEdge> graph;
 	private ArrayList<Constraint> constraints;
+	private ArrayList<ChanceClique> chanceCliques;
+	private ArrayList<Set<String>> cliqueOrder = new ArrayList<>();
 	
-	public void parseConstraints() {
-//		ArrayList<Constraint> constraints = makeConstraints();
-//		System.out.println(constraints);
-//		graph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
-//		
-//		for (Constraint c : constraints) {
-//			graph.addVertex(c.getPredicates().get(0).getAttribute());
-//			graph.addVertex(c.getPredicates().get(1).getAttribute());
-//			graph.addEdge(c.getPredicates().get(0).getAttribute(), c.getPredicates().get(1).getAttribute());
-//		}
-//		
-//		graphAlgorithms();
-		
-		String inputString = "|A1=0&&A2=0|=5 \n |A2=0&&A3=0|=5 \n |A3=0&&A4=0|=5\n";
-		
+	public void parseConstraints(String inputString) {
 		// create a CharStream that reads from standard input
 		ANTLRInputStream input = new ANTLRInputStream(inputString); 
 		
@@ -57,7 +46,7 @@ public class Graph {
 		
 		ParseTree tree = parser.constraints(); // begin parsing at init rule
 		
-		System.out.println(tree.toStringTree(parser)); // print LISP-style tree
+//		System.out.println(tree.toStringTree(parser)); // print LISP-style tree
 		
 		
 		InputToConstraintVisitor vis = new InputToConstraintVisitor();
@@ -66,9 +55,36 @@ public class Graph {
 		constraints = vis.getConstraints();
 		
 		makeGraph();
+		graphAlgorithms();
+		
+		// TODO get domain from input
+		int lowerBound = 0;
+		int upperBound = 1;
+		ArrayList<Integer> domain = new ArrayList<>();
+		for (int i = lowerBound; i <= upperBound; i++)
+			domain.add(i);
+				
+//		for (Constraint c : constraints) {
+//			ArrayList<String> attr = new ArrayList<String>();
+//			attr.addAll(c.getAttributes());
+//		}
+		
+		// TODO get cardinality from input
+		int relationCardinality = 10;
+		UndirectedGraph chordalGraph = getChordalGraph(graph);
+		ChanceCalculator calc = new ChanceCalculator(constraints, getMaximalCliques(chordalGraph), domain, relationCardinality);
+		chanceCliques = calc.getChancesForAllCliques();
 	}
 	
-	public void makeGraph() {
+	public ArrayList<ChanceClique> getChanceCliques() {
+		return chanceCliques;
+	}
+	
+	public ArrayList<Set<String>> getCliqueOrder() {
+		return cliqueOrder;
+	}
+	
+	private void makeGraph() {
 		graph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
 		for (Constraint c : constraints) {
 			Set<String> attrs = c.getPredicate().getAttributes(new HashSet<String>());
@@ -76,7 +92,6 @@ public class Graph {
 			// Add vertices
 			for (String s : attrs) 
 				graph.addVertex(s);
-			
 			
 			// Add edges
 			for (String s1 : attrs) {
@@ -86,81 +101,42 @@ public class Graph {
 				}
 			}
 		}
-			
-		System.out.println(graph);
 	}
 	
-	public void graphAlgorithms(){	
+	private void graphAlgorithms(){	
 		UndirectedGraph chordalGraph = getChordalGraph(graph);
-		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = getWeightedCliqueIntersectionGraph(graph);
+		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = getWeightedCliqueIntersectionGraph(getMaximalCliques(chordalGraph));
 		SimpleWeightedGraph cliqueTree = getMaximumWeightSpanningTree(weightedCliqueIntersectionGraph);
 		
 		System.out.println("Graph: " + graph);
 		System.out.println("chordalGraph: " + chordalGraph);
+		// TODO if maximalCliques.number() == 0, skip everything else and set the clique as only clique in the cliqueOrder
+		// TODO finetune; inputString 3 gives empty cliqueOrder
+		Collection<Set<String>> maxCliques = getMaximalCliques(chordalGraph);
+		System.out.println("maxCliques: " + maxCliques);
+		if (maxCliques.size() <= 1) {
+			System.out.println("maxCliques.size() <= 1");
+			cliqueOrder.addAll(maxCliques);
+			return;
+		}
+		
+//		if (cliqueTree.)
+		
+//		System.out.println("Cliques: " + maxCliques);
 		System.out.println("weightedCliqueIntersectionGraph: " + weightedCliqueIntersectionGraph);
 		System.out.println("cliqueTree: " + cliqueTree);
 		
+		BreadthFirstIterator<Set<String>, DefaultWeightedEdge> order = new BreadthFirstIterator<>(cliqueTree);
+		while (order.hasNext()) {
+			Set<String> next = order.next();
+			cliqueOrder.add(next);
+//			System.out.println(next);
+		}
 		
-//		System.out.println("Graph: " + g.toString());
-//		
-//		CliqueMinimalSeparatorDecomposition<String, DefaultEdge> chordalFinder = new CliqueMinimalSeparatorDecomposition<>(g);
-//		BronKerboschCliqueFinder<String, DefaultEdge> cliqueFinder = new BronKerboschCliqueFinder<>(g); 
-//		System.out.println("Chordal graph? " + chordalFinder.isChordal());
-//		System.out.println("Max cliques: " + cliqueFinder.getAllMaximalCliques());
-//		
-//		
-//		g = chordalFinder.getMinimalTriangulation();
-//		chordalFinder = new CliqueMinimalSeparatorDecomposition<>(g);
-//		cliqueFinder = new BronKerboschCliqueFinder<>(g);
-//		
-//		System.out.println("Chordal Graph: " + g.toString());
-//		System.out.println("Chordal graph? " + chordalFinder.isChordal());
-//		System.out.println("Separators: " + chordalFinder.getSeparators());
-//		System.out.println("Max cliques: " + cliqueFinder.getAllMaximalCliques());
-//		
-//		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-//		
-//		// Iterate over cliques to make weighted clique intersection graph
-//		for (Set<String> s1 : cliqueFinder.getAllMaximalCliques()) {
-//			for (Set<String> s2 : cliqueFinder.getAllMaximalCliques()) {
-//				if (s1.equals(s2))
-//					continue;
-//
-//				// Calculate intersection between cliques
-//				Set<String> intersection = new HashSet<String>(s1);
-//				intersection.retainAll(s2);
-//								
-//				if (intersection.size() <= 0) 
-//					continue;
-//				
-//				 
-//				weightedCliqueIntersectionGraph.addVertex(s1.toString());
-//				weightedCliqueIntersectionGraph.addVertex(s2.toString());
-//				
-//				DefaultWeightedEdge e = weightedCliqueIntersectionGraph.addEdge(s1.toString(), s2.toString()); 
-//				if (e != null)
-//					weightedCliqueIntersectionGraph.setEdgeWeight(e, - intersection.size());
-//			}
-//		}
-//		
-//		System.out.println("Maximum-weighted spanning tree: " + weightedCliqueIntersectionGraph);
-//		
-//		PrimMinimumSpanningTree<String, DefaultWeightedEdge> primMinimumSpanningTree = new PrimMinimumSpanningTree<>(weightedCliqueIntersectionGraph);
-//		System.out.println("Edges necessary to get maximum weight clique tree: " + primMinimumSpanningTree.getMinimumSpanningTreeEdgeSet());
-//		
-//		// remove all edges except necessary for maximum weight clique tree
-//		SimpleWeightedGraph<String, DefaultWeightedEdge> cliqueTree = (SimpleWeightedGraph<String, DefaultWeightedEdge>) weightedCliqueIntersectionGraph.clone();
-//		LinkedList<DefaultWeightedEdge> copy = new LinkedList<>();
-//		for (DefaultWeightedEdge e : cliqueTree.edgeSet()) 
-//			copy.add(e);
-//		cliqueTree.removeAllEdges(copy);
-//		
-//		// add edges necessary for maximum weight clique tree
-//	
-//		for (DefaultWeightedEdge e : primMinimumSpanningTree.getMinimumSpanningTreeEdgeSet()) 
-//			cliqueTree.addEdge(cliqueTree.getEdgeSource(e), cliqueTree.getEdgeTarget(e), e);
-//
-//		System.out.println("CliqueTree: " + cliqueTree);
+		if (cliqueOrder.isEmpty())
+			cliqueOrder.addAll(maxCliques);
+		System.out.println("cliqueOrder: " + cliqueOrder);
+		
 	}
 	
 	private UndirectedGraph getChordalGraph(UndirectedGraph g) {
@@ -177,9 +153,9 @@ public class Graph {
 		return cliqueFinder.getAllMaximalCliques();
 	}
 	
-	private SimpleWeightedGraph getWeightedCliqueIntersectionGraph(UndirectedGraph<String, DefaultEdge> g) {
-		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = new SimpleWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-		Collection<Set> maxCliques = getMaximalCliques(g);
+	private SimpleWeightedGraph getWeightedCliqueIntersectionGraph(Collection<Set<String>> maxCliques) {
+		SimpleWeightedGraph<Set<String>, DefaultWeightedEdge> weightedCliqueIntersectionGraph = new SimpleWeightedGraph<Set<String>, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+//		Collection<Set> maxCliques = getMaximalCliques(g);
 		
 		// Iterate over cliques to make weighted clique intersection graph
 		for (Set s1 : maxCliques) {
@@ -194,10 +170,10 @@ public class Graph {
 				if (intersection.size() <= 0) 
 					continue;
 				
-				weightedCliqueIntersectionGraph.addVertex(s1.toString()); // TODO eerst cliques toevoegen
-				weightedCliqueIntersectionGraph.addVertex(s2.toString());
+				weightedCliqueIntersectionGraph.addVertex(s1); // TODO eerst cliques toevoegen voor efficientie
+				weightedCliqueIntersectionGraph.addVertex(s2);
 				
-				DefaultWeightedEdge e = weightedCliqueIntersectionGraph.addEdge(s1.toString(), s2.toString()); 
+				DefaultWeightedEdge e = weightedCliqueIntersectionGraph.addEdge(s1, s2); 
 				if (e != null) // e == null if it has already been added
 					weightedCliqueIntersectionGraph.setEdgeWeight(e,  - intersection.size()); // need to get maximal spanning tree
 			}
@@ -207,13 +183,13 @@ public class Graph {
 	}
 	
 	private SimpleWeightedGraph getMaximumWeightSpanningTree(SimpleWeightedGraph weightedCliqueIntersectionGraph) {
-		PrimMinimumSpanningTree<String, DefaultWeightedEdge> primMinimumSpanningTree = new PrimMinimumSpanningTree<>(weightedCliqueIntersectionGraph);
+		PrimMinimumSpanningTree<Set<String>, DefaultWeightedEdge> primMinimumSpanningTree = new PrimMinimumSpanningTree<>(weightedCliqueIntersectionGraph);
 		
 		// remove all edges except necessary for maximum weight clique tree
-		SimpleWeightedGraph<String, DefaultWeightedEdge> cliqueTree = (SimpleWeightedGraph<String, DefaultWeightedEdge>) weightedCliqueIntersectionGraph.clone();
+		SimpleWeightedGraph<Set<String>, DefaultWeightedEdge> cliqueTree = (SimpleWeightedGraph<Set<String>, DefaultWeightedEdge>) weightedCliqueIntersectionGraph.clone();
 		LinkedList<DefaultWeightedEdge> copy = new LinkedList<>();
 		for (DefaultWeightedEdge e : cliqueTree.edgeSet())  
-			copy.add(e);// TODO knopen toevoegen aan nieuwe graaf ipv 
+			copy.add(e);// TODO knopen toevoegen aan nieuwe graaf ipv edges verwijderen -> efficienter
 		cliqueTree.removeAllEdges(copy);
 		
 		// add edges necessary for maximum weight clique tree

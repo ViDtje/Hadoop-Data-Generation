@@ -3,6 +3,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.apache.directory.api.util.Base64;
 
@@ -17,14 +18,16 @@ public class MapperContext implements java.io.Serializable {
 	private int firstLineNumber;
 	private int recordNr;
 	private int nrOfRecordsForThisMapper;
-
+	private ArrayList<ChanceClique> chanceCliques;
+	private ArrayList<Set<String>> cliqueOrder;
 
 	@Override
 	public String toString() {
 		return "MapperContext [recordGenerator=" + recordGenerator + ", AttributeGenerators=" + AttributeGenerators
 				+ ", delimiter=" + delimiter + ", nrOfAttributes=" + nrOfAttributes + ", nrOfMappers=" + nrOfMappers
 				+ ", nrOfRecords=" + nrOfRecords + ", mapperId=" + mapperId + ", firstLineNumber=" + firstLineNumber
-				+ ", recordNr=" + recordNr + ", nrOfRecordsForThisMapper=" + nrOfRecordsForThisMapper + "]";
+				+ ", recordNr=" + recordNr + ", nrOfRecordsForThisMapper=" + nrOfRecordsForThisMapper
+				+ ", chanceCliques=" + chanceCliques + ", cliqueOrder=" + cliqueOrder + "]";
 	}
 
 	public String getRecordGenerator() {
@@ -107,6 +110,21 @@ public class MapperContext implements java.io.Serializable {
 		this.mapperId = mapperId;
 	}
 	
+	public ArrayList<ChanceClique> getChanceCliques() {
+		return chanceCliques;
+	}
+
+	public void setChanceCliques(ArrayList<ChanceClique> chanceCliques) {
+		this.chanceCliques = chanceCliques;
+	}
+
+	public ArrayList<Set<String>> getCliqueOrder() {
+		return cliqueOrder;
+	}
+
+	public void setCliqueOrder(ArrayList<Set<String>> cliqueOrder) {
+		this.cliqueOrder = cliqueOrder;
+	}	
 	
 	public static String serializeContext(MapperContext context) {
 		String serializedObject = "";

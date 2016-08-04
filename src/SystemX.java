@@ -1,4 +1,7 @@
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.mapred.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.Job;
@@ -9,16 +12,13 @@ import org.apache.hadoop.util.ToolRunner;
 public class SystemX extends Configured implements Tool {
 	
 	public static void main(String[] args) throws Exception {
-		Graph g = new Graph();
-		g.parseConstraints();
-		
-		int res = 0;
-//		int res = ToolRunner.run(new SystemX(), args);
+//		int res = 0;
+		int res = ToolRunner.run(new SystemX(), args);
 		System.exit(res);
 	}
 	
 	@Override
-	public int run(String[] arg0) throws Exception {
+	public int run(String[] arg0) throws Exception {		
 		JobControl jobctrl = new JobControl("DataGeneration");
 		
 		DataGenJob job = new DataGenJob(parseArguments(arg0), getConf());
@@ -53,11 +53,23 @@ public class SystemX extends Configured implements Tool {
 		return 0;
 	}
 
-	
+	// TODO read from file
 	private JobContext parseArguments(String[] args) {
+		String inputString;
+		inputString = "|A1=0&&A2=0|=5 \n |A2=0&&A3=0|=5 \n |A3=0&&A4=0|=5\n";
+		inputString = "|A=0 && B=1 && C=1| = 1 \n |A=1 && B=0 && C=0| = 1 \n |A=0 && B=1 && C=0| = 1";
+		inputString = "|A=0| = 2 \n |B=0 || C=1| = 2";
+		
+		Graph g = new Graph();
+		g.parseConstraints(inputString);
+		ArrayList<ChanceClique> chanceCliques = g.getChanceCliques();
+		ArrayList<Set<String>> cliqueOrder = g.getCliqueOrder();
+		System.out.println("chanceClique" + chanceCliques);
+		System.out.println("cliqueOrder" + cliqueOrder);
+		
 		int nrOfMappers = 1;
 //		int nrOfRecords = 1000000000;
-		int nrOfRecords = 1000;
+		int nrOfRecords = 1;
 		int nrOfAttributes = 1;
 		
 		if (args.length >= 2) {
@@ -66,13 +78,15 @@ public class SystemX extends Configured implements Tool {
 		}
 		
 		
-		
 		MapperContext mapCtxt = new MapperContext();
 		mapCtxt.setNrOfRecords(nrOfRecords);
 		mapCtxt.setNrOfMappers(nrOfMappers);
 		mapCtxt.setNrOfAttributes(nrOfAttributes);
-		mapCtxt.getAttributeGenerators().add("SquareGenerator");
-		mapCtxt.getAttributeGenerators().add("SumGenerator");
+//		mapCtxt.getAttributeGenerators().add("SquareGenerator");
+//		mapCtxt.getAttributeGenerators().add("SumGenerator");
+		mapCtxt.setRecordGenerator("ConstraintGenerator");
+		mapCtxt.setChanceCliques(g.getChanceCliques());
+		mapCtxt.setCliqueOrder(g.getCliqueOrder());
 		
 		JobContext jobCtxt = new JobContext();
 		jobCtxt.setMapCtxt(mapCtxt);
@@ -80,21 +94,3 @@ public class SystemX extends Configured implements Tool {
 		return jobCtxt;
 	}
 }
- 
-
-//private void solverTest() {
-////	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 2, 3, -2 }, { -1, 7, 6 }, { 4, -3, -5 } }, false);
-//	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0 }, { 1, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
-////	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
-////		{ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
-//	DecompositionSolver solver = new SingularValueDecomposition(coefficients).getSolver();
-////	RealVector constants = new ArrayRealVector(new double[] { 1, -2, 1 }, false);
-//	RealVector constants = new ArrayRealVector(new double[] { 1, 1, 1 }, false);
-//	RealVector solution = solver.solve(constants);
-//	System.out.println(solution.getEntry(0));
-//	System.out.println(solution.getEntry(1));
-//	System.out.println(solution.getEntry(2));
-//	System.out.println(solution.getEntry(3));
-//	System.out.println(solution.getEntry(4));
-//	System.out.println(solution.getEntry(5));
-//}

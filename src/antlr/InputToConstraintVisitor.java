@@ -29,7 +29,7 @@ public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predi
 		c.setPredicate(visit(ctx.predicate()));
 		
 		constraints.add(c);
-		System.out.println("constraint: " + ctx.getText());
+//		System.out.println("constraint: " + ctx.getText());
 		return super.visitChildren(ctx);
 //		return null;
 	}
