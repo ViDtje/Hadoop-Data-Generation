@@ -1,10 +1,7 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -14,8 +11,6 @@ import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
-
-import com.esotericsoftware.kryo.util.IdentityMap;
 
 import predicate.Constraint;
 
@@ -59,14 +54,14 @@ public class ChanceCalculator {
 		// Loop over cliques
 			// per clique lijst van variabelen afgaan om te weten om zo aan de solver in te vullen op 0 of 1 
 			// tegelijk ook bijhouden hoeveel formules er zijn?
-		System.out.println();
+//		System.out.println();
 		
 		ArrayList<HashMap<String, Integer>>  allVariables = getAllVariables();
 //		System.out.println("All variables: " + allVariables);
 		ArrayList<ArrayList<Double>> matrix = new ArrayList<>();
 		ArrayList<Double> constants = new ArrayList<>();
 		
-		System.out.println("All constraints: " + constraints);
+//		System.out.println("All constraints: " + constraints);
 //		for (Set<String> maxClique : maxCliques) {
 		for (int i = 0; i < maxCliques.size() /*- 1*/; i++) {
 			Set<String> maxClique = maxCliques.get(i);
@@ -173,8 +168,8 @@ public class ChanceCalculator {
 			}	
 		}
 		
-		System.out.println("matrix: " + matrix);
-		System.out.println("constants: " + constants);
+//		System.out.println("matrix: " + matrix);
+//		System.out.println("constants: " + constants);
 		
 		// solve for each var
 //		System.out.println(allVariables);
@@ -252,20 +247,20 @@ public class ChanceCalculator {
 		return solver.solve(constants);
 	}
 
-	public void solverTest() {
-	//	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 2, 3, -2 }, { -1, 7, 6 }, { 4, -3, -5 } }, false);
-		RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0 }, { 1, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
-	//	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
-	//		{ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
-		DecompositionSolver solver = new SingularValueDecomposition(coefficients).getSolver();
-	//	RealVector constants = new ArrayRealVector(new double[] { 1, -2, 1 }, false);
-		RealVector constants = new ArrayRealVector(new double[] { 1, 1, 1 }, false);
-		RealVector solution = solver.solve(constants);
-//		System.out.println(solution.getEntry(0));
-//		System.out.println(solution.getEntry(1));
-//		System.out.println(solution.getEntry(2));
-//		System.out.println(solution.getEntry(3));
-//		System.out.println(solution.getEntry(4));
-//		System.out.println(solution.getEntry(5));
-	}
+//	public void solverTest() {
+//	//	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 2, 3, -2 }, { -1, 7, 6 }, { 4, -3, -5 } }, false);
+//		RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0 }, { 1, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
+//	//	RealMatrix coefficients = new Array2DRowRealMatrix(new double[][] { { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+//	//		{ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 1, 1 } }, false);
+//		DecompositionSolver solver = new SingularValueDecomposition(coefficients).getSolver();
+//	//	RealVector constants = new ArrayRealVector(new double[] { 1, -2, 1 }, false);
+//		RealVector constants = new ArrayRealVector(new double[] { 1, 1, 1 }, false);
+//		RealVector solution = solver.solve(constants);
+////		System.out.println(solution.getEntry(0));
+////		System.out.println(solution.getEntry(1));
+////		System.out.println(solution.getEntry(2));
+////		System.out.println(solution.getEntry(3));
+////		System.out.println(solution.getEntry(4));
+////		System.out.println(solution.getEntry(5));
+//	}
 }

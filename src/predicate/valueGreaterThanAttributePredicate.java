@@ -2,7 +2,7 @@ package predicate;
 
 import java.util.HashMap;
 
-public class valueGreaterThanAttributePredicate extends Predicate {
+public class ValueGreaterThanAttributePredicate extends Predicate {
 	private int value;
 
 	@Override

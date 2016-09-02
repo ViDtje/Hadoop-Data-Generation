@@ -12,7 +12,7 @@ public class IntervalPredicate extends Predicate {
 		if (val == null)
 			return false;
 		
-		return ((value1 < val) && (val < value2));
+		return ((value1 <= val) && (val < value2));
 	}
 
 	public int getValue1() {

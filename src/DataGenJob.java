@@ -1,36 +1,17 @@
 
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
-import org.apache.commons.math3.optim.linear.LinearConstraint;
-import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
-import org.apache.commons.math3.optim.linear.Relationship;
-import org.apache.commons.math3.optim.linear.SimplexSolver;
-import org.apache.commons.math3.optimization.GoalType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.tools.GetConf;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
-import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 
@@ -76,11 +57,11 @@ public class DataGenJob {
 		System.out.println("Number of records: " + mapCtxt.getNrOfRecords());
 		// get special parameters, e.g. -Dtest 
 	    // (put these first in arg list!)
-	    System.out.println("test parameter: " + conf.get("test"));
+//	    System.out.println("test parameter: " + conf.get("test"));
 		
 	    // Only works after the conf has been filled by the job
-		System.out.println("map spill buffer: "+ job.getConfiguration().get("mapreduce.task.io.sort.mb"));
-		System.out.println("map spill percent: " + job.getConfiguration().get("mapreduce.map.sort.spill.percent"));
+//		System.out.println("map spill buffer: "+ job.getConfiguration().get("mapreduce.task.io.sort.mb"));
+//		System.out.println("map spill percent: " + job.getConfiguration().get("mapreduce.map.sort.spill.percent"));
 		
 		return cJob;
 	}

@@ -8,8 +8,8 @@ import predicate.DisjunctionPredicate;
 import predicate.EqualityPredicate;
 import predicate.IntervalPredicate;
 import predicate.Predicate;
-import predicate.valueGreaterThanAttributePredicate;
-import predicate.valueLowerThanAttributePredicate;
+import predicate.ValueGreaterThanAttributePredicate;
+import predicate.ValueLowerThanAttributePredicate;
 
 public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predicate> {
 	private ArrayList<Constraint> constraints = new ArrayList<>();
@@ -77,7 +77,7 @@ public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predi
 	 * @return the visitor result
 	 */
 	public Predicate visitValueLowerThanAttribute(ConstraintGrammarParser.ValueLowerThanAttributeContext ctx) {
-		valueLowerThanAttributePredicate p = new valueLowerThanAttributePredicate();
+		ValueLowerThanAttributePredicate p = new ValueLowerThanAttributePredicate();
 		p.setAttribute(ctx.ATTRIBUTE().getText());
 		p.setValue(Integer.parseInt(ctx.VALUE().getText()));
 		return p;
@@ -89,7 +89,7 @@ public class InputToConstraintVisitor extends ConstraintGrammarBaseVisitor<Predi
 	 * @return the visitor result
 	 */
 	public Predicate visitValueGreaterThanAttribute(ConstraintGrammarParser.ValueGreaterThanAttributeContext ctx) {
-		valueGreaterThanAttributePredicate p = new valueGreaterThanAttributePredicate();
+		ValueGreaterThanAttributePredicate p = new ValueGreaterThanAttributePredicate();
 		p.setAttribute(ctx.ATTRIBUTE().getText());
 		p.setValue(Integer.parseInt(ctx.VALUE().getText()));
 		return p;

@@ -16,14 +16,17 @@ public class GenerationMapper extends Mapper<LongWritable, Text, NullWritable, T
 	protected void setup(Context context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();        
         mapperContext = MapperContext.deserializeContext(conf.get("Datagen.context"));
-        System.out.println("MapperContext: " + mapperContext);
+//        System.out.println("MapperContext: " + mapperContext);
 	}
 	
 	@Override
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {		
 		mapperContext.setMapperId(Integer.parseInt(value.toString()));
 		
-		mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
+		if (mapperContext.getSingleAttributeRanges() != null)
+			mapperContext.setNrOfRecordsForThisMapper(mapperContext.getSingleAttributeRanges().get(mapperContext.getMapperId()).getTimes());
+		else
+			mapperContext.setNrOfRecordsForThisMapper(mapperContext.getNrOfRecords()/mapperContext.getNrOfMappers());
 		mapperContext.setFirstLineNumber(mapperContext.getMapperId() * mapperContext.getNrOfRecords());		
 		
 		UserGenerator gen = UserGenerator.makeUserGenerator(mapperContext);
@@ -35,38 +38,4 @@ public class GenerationMapper extends Mapper<LongWritable, Text, NullWritable, T
 			context.write(NullWritable.get(), new Text(gen.generate()));
 		}
 	}
-	
-//	private UserGenerator makeGenerator() {
-//		if (mapperContext.getRecordGenerator() != null)
-//			return makeRecordGenerator();
-//		
-//		return makeAttributeGenerator();
-//	}
-//
-//
-//
-//	private UserGenerator makeRecordGenerator() {
-//		return UserGenerator.makeUserGenerator(mapperContext.getRecordGenerator());
-////		Class c = null;
-////		try {	
-////			c = Class.forName(mapperContext.getRecordGenerator());
-////		} catch (ClassNotFoundException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		}
-////		Object obj = null;
-////		try {
-////			obj = c.newInstance();
-////		} catch (InstantiationException | IllegalAccessException e) {
-////			// TODO Auto-generated catch block
-////			e.printStackTrace();
-////		}
-////		UserGenerator gen = (UserGenerator) obj;
-////		gen.setMapperContext(mapperContext);
-////		return gen;
-//	}
-//	
-//	private UserGenerator makeAttributeGenerator() {
-//		return new AttributeGenerator();
-//	}
 }

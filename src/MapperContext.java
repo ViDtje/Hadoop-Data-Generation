@@ -20,6 +20,8 @@ public class MapperContext implements java.io.Serializable {
 	private int nrOfRecordsForThisMapper;
 	private ArrayList<ChanceClique> chanceCliques;
 	private ArrayList<Set<String>> cliqueOrder;
+	private ArrayList<String> attributes;
+	private ArrayList<SingleAttributeRange> singleAttributeRanges;
 
 	@Override
 	public String toString() {
@@ -126,6 +128,22 @@ public class MapperContext implements java.io.Serializable {
 		this.cliqueOrder = cliqueOrder;
 	}	
 	
+	public ArrayList<String> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(ArrayList<String> attributes) {
+		this.attributes = attributes;
+	}
+	
+	public ArrayList<SingleAttributeRange> getSingleAttributeRanges() {
+		return singleAttributeRanges;
+	}
+
+	public void setSingleAttributeRanges(ArrayList<SingleAttributeRange> singleAttributeRanges) {
+		this.singleAttributeRanges = singleAttributeRanges;
+	}
+
 	public static String serializeContext(MapperContext context) {
 		String serializedObject = "";
 
@@ -157,5 +175,5 @@ public class MapperContext implements java.io.Serializable {
 		 }
 		
 		return obj;
-	}
+	}	
 }

@@ -4,25 +4,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.BronKerboschCliqueFinder;
 import org.jgrapht.alg.CliqueMinimalSeparatorDecomposition;
-import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.alg.PrimMinimumSpanningTree;
-import org.jgrapht.alg.TarjanLowestCommonAncestor;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
-import antlr.ConstraintGrammarLexer;
-import antlr.ConstraintGrammarParser;
-import antlr.ConstraintGrammarVisitor;
-import antlr.InputToConstraintVisitor;
 import predicate.Constraint;
 
 public class Graph {
@@ -30,47 +21,23 @@ public class Graph {
 	private ArrayList<Constraint> constraints;
 	private ArrayList<ChanceClique> chanceCliques;
 	private ArrayList<Set<String>> cliqueOrder = new ArrayList<>();
+	private ArrayList<String> attributes;
+	private ArrayList<Integer> domain = new ArrayList<>();
 	
-	public void parseConstraints(String inputString) {
-		// create a CharStream that reads from standard input
-		ANTLRInputStream input = new ANTLRInputStream(inputString); 
-		
-		// create a lexer that feeds off of input CharStream
-		ConstraintGrammarLexer lexer = new ConstraintGrammarLexer(input); 
-		
-		// create a buffer of tokens pulled from the lexer
-		CommonTokenStream tokens = new CommonTokenStream(lexer); 
-		
-		// create a parser that feeds off the tokens buffer
-		ConstraintGrammarParser parser = new ConstraintGrammarParser(tokens);
-		
-		ParseTree tree = parser.constraints(); // begin parsing at init rule
-		
-//		System.out.println(tree.toStringTree(parser)); // print LISP-style tree
-		
-		
-		InputToConstraintVisitor vis = new InputToConstraintVisitor();
-		vis.visit(tree);
-//		System.out.println(vis.getConstraints());
-		constraints = vis.getConstraints();
+	int relationCardinality;
+	
+	public Graph(ArrayList<String> attributes, int nrOfRecords , ArrayList<Integer> domain) {
+		this.attributes = attributes;
+		relationCardinality = nrOfRecords;
+		this.domain = domain;
+	}
+	
+	public void parseConstraints(ArrayList<Constraint> constraints) {
+		this.constraints = constraints;
 		
 		makeGraph();
 		graphAlgorithms();
 		
-		// TODO get domain from input
-		int lowerBound = 0;
-		int upperBound = 1;
-		ArrayList<Integer> domain = new ArrayList<>();
-		for (int i = lowerBound; i <= upperBound; i++)
-			domain.add(i);
-				
-//		for (Constraint c : constraints) {
-//			ArrayList<String> attr = new ArrayList<String>();
-//			attr.addAll(c.getAttributes());
-//		}
-		
-		// TODO get cardinality from input
-		int relationCardinality = 10;
 		UndirectedGraph chordalGraph = getChordalGraph(graph);
 		ChanceCalculator calc = new ChanceCalculator(constraints, getMaximalCliques(chordalGraph), domain, relationCardinality);
 		chanceCliques = calc.getChancesForAllCliques();
@@ -86,6 +53,10 @@ public class Graph {
 	
 	private void makeGraph() {
 		graph = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+		for (String attr : attributes)
+			graph.addVertex(attr);
+		
+		
 		for (Constraint c : constraints) {
 			Set<String> attrs = c.getPredicate().getAttributes(new HashSet<String>());
 			
@@ -108,14 +79,12 @@ public class Graph {
 		SimpleWeightedGraph<String, DefaultWeightedEdge> weightedCliqueIntersectionGraph = getWeightedCliqueIntersectionGraph(getMaximalCliques(chordalGraph));
 		SimpleWeightedGraph cliqueTree = getMaximumWeightSpanningTree(weightedCliqueIntersectionGraph);
 		
-		System.out.println("Graph: " + graph);
-		System.out.println("chordalGraph: " + chordalGraph);
-		// TODO if maximalCliques.number() == 0, skip everything else and set the clique as only clique in the cliqueOrder
-		// TODO finetune; inputString 3 gives empty cliqueOrder
+//		System.out.println("Graph: " + graph);
+//		System.out.println("chordalGraph: " + chordalGraph);
 		Collection<Set<String>> maxCliques = getMaximalCliques(chordalGraph);
-		System.out.println("maxCliques: " + maxCliques);
+//		System.out.println("maxCliques: " + maxCliques);
 		if (maxCliques.size() <= 1) {
-			System.out.println("maxCliques.size() <= 1");
+//			System.out.println("maxCliques.size() <= 1");
 			cliqueOrder.addAll(maxCliques);
 			return;
 		}
@@ -135,7 +104,7 @@ public class Graph {
 		
 		if (cliqueOrder.isEmpty())
 			cliqueOrder.addAll(maxCliques);
-		System.out.println("cliqueOrder: " + cliqueOrder);
+//		System.out.println("cliqueOrder: " + cliqueOrder);
 		
 	}
 	
